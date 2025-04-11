@@ -14,33 +14,33 @@ class Task{
             completed = true;
         }
         string toString() const{
-            return description + (completed ? " [✅]" : " [ ]");
+            return description + (completed ? " [Completed]" : " [ ]");
         }
 
 };
 
 class ToDoLApp{
-    private: vector<Task> task;
+    private: vector<Task> tasks;
     string filename = "text.txt";
 
     public:
         // Method to add tasks
-        void addTask(string &description){
-            task.emplace_back(description);
+        void addTask(const string &description){
+            tasks.emplace_back(description);
             cout << "Task added successfully";
         }
 
         // Method for view task
         void display(){
-            for(int i=0; i< task.size() ; i++){
-                cout << i+1 <<"."<<task[i].toString()<<endl;
+            for(int i=0; i< tasks.size() ; i++){
+                cout << i+1 <<"."<<tasks[i].toString()<<endl;
             }
         }
 
         //Method mark as completed
         void markasCompleted(int index){
-            if(index >= 0 && index <= task.size()){
-                task[index].markCompleted();
+            if(index >= 0 && index < tasks.size()){
+                tasks[index].markCompleted();
             }
             else{
                 cout<<"Please enter a valid index"<< endl;
@@ -50,10 +50,29 @@ class ToDoLApp{
         //Save Task in file
         void saveTask(){
             ofstream outFile(filename);
-            for(auto it : task){
-                outFile<< it.description << "|" << it.completed<< endl;
+            for(auto task : tasks){
+                outFile<< task.description << "|" << task.completed<< endl;
             }
             outFile.close();
+        }
+
+        // Updating File
+        void updateFile(){
+            ifstream inFile(filename);
+            string line;
+            while(getline(inFile, line)){
+                size_t pos = line.find("|");
+                if(pos != string::npos){
+                    string desc = line.substr(0,pos);
+                    bool completed = (line.substr(pos+1) == "1");
+                    Task task(desc);
+                    if(completed){
+                        task.markCompleted();
+                    }
+                    tasks.push_back(task);
+                }
+            }
+            inFile.close();
         }
 };
 
@@ -81,11 +100,13 @@ int main(){
         case 2:
             int index;
             cout<<"Enter the task number to mark as completed"<<endl;
+            cin >> index;
             todoapp.markasCompleted(index-1);
             break;
         case 3:
             cout<<"Your To-Do List is :"<<endl;
             todoapp.display();
+            break;
         case 4:
             todoapp.saveTask();
             cout<<"Task save and Exit"<<endl;
